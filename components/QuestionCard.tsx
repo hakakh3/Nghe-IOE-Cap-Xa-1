@@ -13,13 +13,11 @@ interface QuestionCardProps {
 
 const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, isAnswered, userAnswer }) => {
   const [inputVal, setInputVal] = useState('');
-  const [selectedParts, setSelectedParts] = useState<string[]>([]);
   const [showHint, setShowHint] = useState(false);
   const [hintInfo, setHintInfo] = useState<{ length?: number, firstChar?: string, text?: string }>({});
 
   useEffect(() => {
     setInputVal('');
-    setSelectedParts([]);
     setShowHint(false);
     setHintInfo({});
   }, [question.id]);
@@ -33,8 +31,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, isAnswe
     }
   };
 
-  const handleInputSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleInputSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!isAnswered && inputVal.trim()) {
       onAnswer(inputVal.trim());
     }
@@ -48,15 +46,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, isAnswe
       setHintInfo({
         length: ans.length,
         firstChar: ans.charAt(0).toUpperCase(),
-        text: "Hãy tập trung nghe kỹ từ còn thiếu trong đoạn audio."
-      });
-    } else if (question.type === QuestionType.MULTIPLE_CHOICE) {
-      setHintInfo({
-        text: "Gợi ý: Hãy loại bỏ những đáp án bạn nghe thấy rõ ràng là không khớp với ngữ cảnh."
+        text: "Gợi ý: Hãy lắng nghe thật kỹ từ còn thiếu."
       });
     } else {
       setHintInfo({
-        text: "Gợi ý: Chú ý thứ tự các thành phần S + V + O trong câu."
+        text: "Gợi ý: Một trong 4 đáp án bên dưới là câu trả lời chính xác."
       });
     }
   };
@@ -72,41 +66,41 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, isAnswe
             {!isAnswered && (
               <button 
                 onClick={() => { generateHint(); setShowHint(!showHint); }} 
-                className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase border-2 rounded-full bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase border-2 rounded-full bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100 transition-all shadow-sm"
               >
                 <span>{showHint ? 'Ẩn Gợi ý' : 'Gợi ý 💡'}</span>
               </button>
             )}
           </div>
-          <span className="text-[10px] font-black text-slate-300">QUESTION ID: {question.id}</span>
+          <span className="text-[10px] font-black text-slate-300 tracking-widest">#{question.id}</span>
         </div>
         
         <div className="p-8 sm:p-12">
-          <div className="mb-8 space-y-4">
+          <div className="mb-10 space-y-4">
             {question.audioUrl && (
-              <div className="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100 shadow-sm">
+              <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100 shadow-sm transition-all hover:shadow-md">
                 <AudioPlayer src={question.audioUrl} />
               </div>
             )}
           </div>
 
           {showHint && !isAnswered && (
-            <div className="mb-8 bg-amber-50 p-5 rounded-2xl text-sm text-amber-900 border-2 border-amber-100 shadow-inner animate-fade-in">
-              <div className="flex flex-col gap-2 font-bold">
+            <div className="mb-10 bg-amber-50 p-6 rounded-2xl text-sm text-amber-900 border-2 border-amber-100 shadow-inner animate-fade-in">
+              <div className="flex flex-col gap-3 font-bold">
                 {hintInfo.length && (
-                  <p className="flex items-center gap-2">
-                    <span className="text-amber-500">📏</span> 
-                    Độ dài: <span className="text-indigo-600">{hintInfo.length} chữ cái</span>
+                  <p className="flex items-center gap-3">
+                    <span className="bg-amber-200 w-8 h-8 rounded-lg flex items-center justify-center shrink-0">📏</span> 
+                    Từ có: <span className="text-indigo-600 text-lg">{hintInfo.length} chữ cái</span>
                   </p>
                 )}
                 {hintInfo.firstChar && (
-                  <p className="flex items-center gap-2">
-                    <span className="text-amber-500">🔤</span> 
-                    Bắt đầu bằng: <span className="text-indigo-600 text-lg">"{hintInfo.firstChar}"</span>
+                  <p className="flex items-center gap-3">
+                    <span className="bg-amber-200 w-8 h-8 rounded-lg flex items-center justify-center shrink-0">🔤</span> 
+                    Bắt đầu bằng: <span className="text-indigo-600 text-2xl uppercase underline underline-offset-4 decoration-indigo-200">"{hintInfo.firstChar}"</span>
                   </p>
                 )}
                 {hintInfo.text && (
-                  <p className="italic text-amber-700 mt-1 flex items-start gap-2">
+                  <p className="italic text-amber-700 mt-2 flex items-start gap-3">
                     <span className="text-amber-500 mt-0.5">ℹ️</span>
                     {hintInfo.text}
                   </p>
@@ -115,29 +109,29 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, isAnswe
             </div>
           )}
 
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-800 mb-10 leading-relaxed">
-            {question.questionText}
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-800 mb-12 leading-relaxed tracking-tight italic">
+            "{question.questionText}"
           </h2>
 
           {question.type === QuestionType.MULTIPLE_CHOICE && (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-5">
               {question.options?.map((opt, idx) => (
                 <button 
                   key={idx} 
                   onClick={() => handleMCSelect(opt)} 
                   disabled={isAnswered} 
-                  className={`w-full p-5 rounded-2xl text-left border-2 transition-all font-bold text-lg flex items-center gap-4 ${
+                  className={`w-full p-6 rounded-2xl text-left border-4 transition-all font-black text-xl flex items-center gap-5 shadow-sm active:scale-[0.98] ${
                     isAnswered 
                       ? (opt === question.correctAnswer 
-                          ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-200' 
+                          ? 'bg-emerald-500 border-emerald-500 text-white shadow-xl shadow-emerald-200 scale-[1.02]' 
                           : opt === userAnswer 
-                            ? 'bg-rose-500 border-rose-500 text-white shadow-lg shadow-rose-200' 
-                            : 'bg-slate-50 opacity-40 text-slate-400'
+                            ? 'bg-rose-500 border-rose-500 text-white opacity-80' 
+                            : 'bg-slate-50 opacity-40 text-slate-400 border-slate-100'
                         ) 
-                      : 'bg-white border-slate-100 hover:border-indigo-500 hover:shadow-md text-slate-700'
+                      : 'bg-white border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/20 text-slate-700'
                   }`}
                 >
-                  <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border-2 ${isAnswered && opt === question.correctAnswer ? 'bg-white/20 border-white' : 'bg-slate-50 border-slate-100'}`}>
+                  <span className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border-2 font-black ${isAnswered && opt === question.correctAnswer ? 'bg-white/20 border-white' : 'bg-slate-50 border-slate-200'}`}>
                     {String.fromCharCode(65 + idx)}
                   </span>
                   {opt}
@@ -147,53 +141,52 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, isAnswe
           )}
 
           {question.type === QuestionType.FILL_IN_BLANK && (
-            <form onSubmit={handleInputSubmit} className="flex flex-col gap-4">
-              <div className="flex gap-4">
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-5">
                 <input 
                   type="text" 
                   value={isAnswered && userAnswer ? userAnswer : inputVal} 
                   onChange={(e) => setInputVal(e.target.value)} 
+                  onKeyDown={(e) => { if(e.key === 'Enter' && !isAnswered) handleInputSubmit(); }}
                   disabled={isAnswered} 
-                  className={`flex-1 p-5 rounded-2xl border-2 font-black text-xl outline-none transition-all ${
+                  autoFocus
+                  className={`flex-1 p-6 rounded-[2rem] border-4 font-black text-2xl outline-none transition-all shadow-inner ${
                     isAnswered 
-                      ? (isCorrect() ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-rose-500 bg-rose-50 text-rose-700') 
-                      : 'border-slate-100 bg-slate-50 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100'
+                      ? (isCorrect() ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-rose-500 bg-rose-50 text-rose-800') 
+                      : 'border-slate-100 bg-slate-50 focus:border-indigo-500 focus:ring-8 focus:ring-indigo-100'
                   }`} 
-                  placeholder="Nhập đáp án bạn nghe được..." 
+                  placeholder="Gõ từ nghe được..." 
                 />
                 {!isAnswered && (
-                  <Button type="submit" size="lg" className="px-10">
-                    GỬI
-                  </Button>
+                  <button 
+                    onClick={handleInputSubmit}
+                    className="px-10 py-6 bg-indigo-600 text-white rounded-[2rem] font-black shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-90 transition-all text-xl"
+                  >
+                    NỘP BÀI
+                  </button>
                 )}
               </div>
-              {!isAnswered && <div className="text-xs font-black text-indigo-400 text-right uppercase tracking-widest">Đã nhập: {inputVal.length} KÝ TỰ</div>}
-            </form>
+              {!isAnswered && <div className="text-[10px] font-black text-slate-400 text-center uppercase tracking-widest">Nhấn ENTER để nộp nhanh</div>}
+            </div>
           )}
 
           {isAnswered && (
-            <div className={`mt-10 p-8 rounded-[2rem] border-l-8 shadow-xl animate-fade-in ${isCorrect() ? 'bg-emerald-50 border-emerald-500' : 'bg-rose-50 border-rose-500'}`}>
-              <div className="flex items-start gap-5">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-white font-black text-xl shadow-lg ${isCorrect() ? 'bg-emerald-500 shadow-emerald-200' : 'bg-rose-500 shadow-rose-200'}`}>
+            <div className={`mt-14 p-8 rounded-[3rem] border-l-[12px] shadow-2xl animate-fade-in ${isCorrect() ? 'bg-emerald-50 border-emerald-500' : 'bg-rose-50 border-rose-500'}`}>
+              <div className="flex items-start gap-7">
+                <div className={`w-16 h-16 rounded-3xl flex items-center justify-center shrink-0 text-white font-black text-3xl shadow-xl ${isCorrect() ? 'bg-emerald-500 shadow-emerald-200' : 'bg-rose-500 shadow-rose-200'}`}>
                   {isCorrect() ? '✓' : '✕'}
                 </div>
                 <div>
-                  <h3 className={`font-black text-2xl mb-2 tracking-tight ${isCorrect() ? 'text-emerald-800' : 'text-rose-800'}`}>
-                    {isCorrect() ? 'TUYỆT VỜI!' : 'CHƯA CHÍNH XÁC'}
+                  <h3 className={`font-black text-3xl mb-3 tracking-tight ${isCorrect() ? 'text-emerald-900' : 'text-rose-900'}`}>
+                    {isCorrect() ? 'TUYỆT VỜI, CHÍNH XÁC!' : 'CỐ GẮNG LẦN SAU NHÉ!'}
                   </h3>
                   {!isCorrect() && (
-                    <div className="mb-4">
-                      <span className="text-rose-600 font-black text-xs uppercase tracking-widest">Đáp án đúng:</span> 
-                      <span className="font-black text-slate-800 ml-2 text-xl underline decoration-rose-300 decoration-4 underline-offset-4">{question.correctAnswer.toUpperCase()}</span>
+                    <div className="mb-5">
+                      <span className="text-rose-400 font-black text-[10px] uppercase tracking-widest block mb-1">Đáp án đúng phải là:</span> 
+                      <span className="font-black text-rose-600 text-4xl underline decoration-rose-200 decoration-8 underline-offset-4 tracking-tight">{question.correctAnswer.toUpperCase()}</span>
                     </div>
                   )}
-                  <div className="bg-white/70 p-5 rounded-2xl text-slate-700 font-bold border border-white">
-                    <span className="text-indigo-600 block mb-2 text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"></path></svg>
-                      Giải thích & Dịch thuật
-                    </span>
-                    <p className="leading-relaxed">{question.explanation}</p>
-                  </div>
+                  <p className="text-slate-600 font-bold leading-relaxed text-lg italic opacity-90">"{question.explanation}"</p>
                 </div>
               </div>
             </div>
